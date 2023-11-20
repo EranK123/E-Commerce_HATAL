@@ -131,13 +131,17 @@ def product_details(product_id):
 
 # Product search route
 @app.route("/search", methods=['GET', 'POST'])
-@login_required
+# @login_required  # Uncomment if you want to require login for search
 def search():
-    # Implement product search logic here
     if request.method == 'POST':
         search_query = request.form.get('search_query')
         # Perform the search using the query and display the results
         # You can customize this based on your product model and search criteria
+
+        # Example: Assuming 'name' is a field in your Product model
+        search_results = Product.query.filter(Product.name.ilike(f"%{search_query}%")).all()
+
+        return render_template("search.html", search_results=search_results, query=search_query)
 
     return render_template("search.html")
 
