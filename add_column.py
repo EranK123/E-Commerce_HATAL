@@ -1,5 +1,5 @@
-from app import db
-from app import User
+from myapp import db
+from myapp import User
 
 from sqlalchemy import text
 

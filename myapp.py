@@ -112,6 +112,39 @@ def profile():
     return render_template("profile.html", user=current_user)
 
 
+################# Product ############
+# Product listing route
+@app.route("/products")
+@login_required
+def product_list():
+    products = Product.query.all()
+    return render_template("product_list.html", products=products)
+
+
+# Product details route
+@app.route("/product/<int:product_id>")
+@login_required
+def product_details(product_id):
+    product = Product.query.get_or_404(product_id)
+    return render_template("product_details.html", product=product)
+
+
+# Product search route
+@app.route("/search", methods=['GET', 'POST'])
+@login_required
+def search():
+    # Implement product search logic here
+    if request.method == 'POST':
+        search_query = request.form.get('search_query')
+        # Perform the search using the query and display the results
+        # You can customize this based on your product model and search criteria
+
+    return render_template("search.html")
+
+
+################# Product ############
+
+
 if __name__ == '__main__':
     with app.app_context():
         db.create_all()
