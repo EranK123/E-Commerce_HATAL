@@ -15,5 +15,8 @@
       {{ form.submit(class="btn btn-outline-info btn-lg") }}
     </div>
   </form>
+{% if current_user.is_authenticated %}
+    <p>Already logged in. <a href="{{ url_for('logout') }}">Logout</a></p>
+{% endif %}
   <p>Don't have an account? <a href="{{ url_for('register') }}">Register here</a>.</p>
 {% endblock %}
