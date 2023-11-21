@@ -1,51 +1,40 @@
-from flask import Flask, render_template, redirect, url_for, flash, request
+from flask import Flask, render_template, redirect, url_for, flash
+from flask_login import LoginManager, login_user, login_required, logout_user, current_user, UserMixin
 from flask_sqlalchemy import SQLAlchemy
-from flask_wtf import FlaskForm
-from werkzeug.security import check_password_hash
-from wtforms import StringField, PasswordField, SubmitField, FloatField, TextAreaField
-from wtforms.validators import DataRequired, Email, EqualTo
-from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
-from models.User import User  # Import the User class
-from models.User import db
-from models.Product import Product
 
+# from models.User import User
+# from models.User import db
+# from models.Product import Product
+from models.Forms.ProductForm import ProductForm
+from models.Forms.RegistrationForm import RegistrationForm
+from models.Forms.LoginForm import LoginForm
+from models.Forms.SearchByCategoryForm import SearchByCategoryForm
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'your_secret_key'
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///site.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SQLALCHEMY_POOL_SIZE'] = 10
-db.init_app(app)
+
+db = SQLAlchemy(app)
+# db_session = db.scoped_session(db.sessionmaker(autocommit=False, autoflush=False, bind=db.engine))
+
 login_manager = LoginManager(app)
 login_manager.login_view = 'login'
 
 
-class ProductForm(FlaskForm):
-    category = StringField('Category', validators=[DataRequired()])
-    price = FloatField('Price', validators=[DataRequired()])
-    description = TextAreaField('Description', validators=[DataRequired()])
-    submit = SubmitField('Add Product')
+class User(db.Model, UserMixin):
+    id = db.Column(db.Integer, primary_key=True)
+    username = db.Column(db.String(20), unique=True, nullable=False)
+    email = db.Column(db.String(120), unique=True, nullable=False)
+    password = db.Column(db.String(60), nullable=False)
 
 
-# Registration form
-class RegistrationForm(FlaskForm):
-    username = StringField('Username', validators=[DataRequired()])
-    email = StringField('Email', validators=[DataRequired(), Email()])
-    password = PasswordField('Password', validators=[DataRequired()])
-    confirm_password = PasswordField('Confirm Password', validators=[DataRequired(), EqualTo('password')])
-    submit = SubmitField('Sign Up')
-
-
-# Login form
-class LoginForm(FlaskForm):
-    email = StringField('Email', validators=[DataRequired(), Email()])
-    password = PasswordField('Password', validators=[DataRequired()])
-    submit = SubmitField('Login')
-
-
-class SearchByCategoryForm(FlaskForm):
-    category = StringField('Category')
-    submit_search = SubmitField('Search')
+class Product(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(50), nullable=False)
+    price = db.Column(db.Float, nullable=False)
+    description = db.Column(db.Text, nullable=False)
 
 
 @login_manager.user_loader
@@ -159,6 +148,14 @@ def admin_dashboard():
     form = ProductForm()
     products = Product.query.all()
     return render_template("admin_dashboard.html", form=form, products=products)
+
+
+@app.route("/admin/logout")
+@login_required
+def admin_logout():
+    logout_user()
+    flash('Admin logged out successfully!', 'success')
+    return redirect(url_for('login'))
 
 
 @app.route("/admin/add_product", methods=['POST'])
