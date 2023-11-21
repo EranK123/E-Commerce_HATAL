@@ -42,7 +42,6 @@ def load_user(user_id):
     return User.query.get(int(user_id))
 
 
-# Routes
 @app.route("/")
 def home():
     return render_template("home.html")
@@ -133,9 +132,7 @@ def search_by_category():
 
     if form.validate_on_submit():
         search_query = form.category.data
-
         search_results = Product.query.filter(Product.name.ilike(f"%{search_query}%")).all()
-
         return render_template("profile.html", user=current_user, form=form, search_results=search_results)
 
     # Redirect to the profile page if the form is not submitted correctly
@@ -165,8 +162,7 @@ def add_product():
         product = Product(
             name=form.category.data,
             price=form.price.data,
-            description=form.description.data
-        )
+            description=form.description.data)
         db.session.add(product)
         db.session.commit()
         flash('Product added successfully!', 'success')
