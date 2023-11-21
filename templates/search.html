@@ -1,0 +1,25 @@
+<!-- templates/search.html -->
+
+{% extends "base.html" %}
+{% block content %}
+  {% if current_user.is_authenticated %}
+    <h2>Search Results</h2>
+    <form method="post" action="{{ url_for('search') }}">
+        <input type="text" name="search_query" placeholder="Enter category">
+        <input type="submit" value="Search">
+    </form>
+    {% if search_results %}
+      <ul>
+        {% for product in search_results %}
+          <li>
+            <strong>{{ product.category }}</strong>: {{ product.description }} - ${{ product.price }}
+          </li>
+        {% endfor %}
+      </ul>
+    {% else %}
+      <p>No results found for '{{ query }}'.</p>
+    {% endif %}
+  {% else %}
+    <p>You need to be logged in to use the search feature.</p>
+  {% endif %}
+{% endblock %}

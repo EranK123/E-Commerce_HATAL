@@ -1,0 +1,52 @@
+<!-- templates/admin_dashboard.html -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- ... (head content) ... -->
+</head>
+<body>
+    <h1>Welcome, Admin!</h1>
+
+    <!-- Product Form -->
+    <h2>Add Product</h2>
+    <form method="POST" action="{{ url_for('add_product') }}">
+        {{ form.hidden_tag() }}
+        {{ form.csrf_token }}
+        <div>
+            {{ form.category.label }} {{ form.category() }}
+            {{ form.category.errors }}
+        </div>
+        <div>
+            {{ form.price.label }} {{ form.price() }}
+            {{ form.price.errors }}
+        </div>
+        <div>
+            {{ form.description.label }} {{ form.description() }}
+            {{ form.description.errors }}
+        </div>
+        <div>
+            {{ form.submit() }}
+        </div>
+    </form>
+    <!-- ... other content ... -->
+<div>
+    <a href="{{ url_for('admin_logout') }}">Logout</a>
+</div>
+<!-- ... other content ... -->
+
+    <!-- Product List -->
+    <h2>Product List</h2>
+    <ul>
+        {% for product in products %}
+            <li>
+                Category: {{ product.category }} |
+                Price: {{ product.price }} |
+                Description: {{ product.description }}
+            </li>
+        {% endfor %}
+    </ul>
+
+    <!-- ... (other content) ... -->
+</body>
+</html>
