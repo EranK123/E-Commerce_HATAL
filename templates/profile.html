@@ -1,8 +1,31 @@
+<!-- templates/profile.html -->
+
 {% extends "base.html" %}
 {% block content %}
   <h2>Profile</h2>
-<li><a href="{{ url_for('product_list') }}">Products</a></li>
+
   <p>Welcome, {{ user.username }}!</p>
   <p>Email: {{ user.email }}</p>
   <a href="{{ url_for('logout') }}">Logout</a>
+
+  <h3>Search for Items by Category</h3>
+
+<form method="post" action="{{ url_for('profile') }}">
+    {{ form.hidden_tag() }}
+    {{ form.category.label }}
+    {{ form.category(size=32) }}
+    {{ form.submit_search() }}
+</form>
+
+
+  {% if search_results %}
+    <h3>Search Results</h3>
+    <ul>
+      {% for product in search_results %}
+        <li>
+          <strong>{{ product.category }}</strong>: {{ product.description }} - ${{ product.price }}
+        </li>
+      {% endfor %}
+    </ul>
+  {% endif %}
 {% endblock %}
