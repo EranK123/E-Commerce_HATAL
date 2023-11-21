@@ -9,20 +9,15 @@ from models.User import User  # Import the User class
 from models.User import db
 from models.Product import Product
 
+
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'your_secret_key'
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///site.db'  # Use SQLite
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///site.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+app.config['SQLALCHEMY_POOL_SIZE'] = 10
 db.init_app(app)
 login_manager = LoginManager(app)
 login_manager.login_view = 'login'
-
-
-# class User(db.Model, UserMixin):
-#     id = db.Column(db.Integer, primary_key=True)
-#     username = db.Column(db.String(20), unique=True, nullable=False)
-#     email = db.Column(db.String(120), unique=True, nullable=False)
-#     password = db.Column(db.String(60), nullable=False)
 
 
 class ProductForm(FlaskForm):
@@ -150,11 +145,7 @@ def search_by_category():
     if form.validate_on_submit():
         search_query = form.category.data
 
-        # Perform the search using the query and display the results
-        # You can customize this based on your product model and search criteria
-
-        # Example: Assuming 'category' is a field in your Product model
-        search_results = Product.query.filter(Product.category.ilike(f"%{search_query}%")).all()
+        search_results = Product.query.filter(Product.name.ilike(f"%{search_query}%")).all()
 
         return render_template("profile.html", user=current_user, form=form, search_results=search_results)
 
