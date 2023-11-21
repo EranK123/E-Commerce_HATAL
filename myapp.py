@@ -1,14 +1,16 @@
 from flask import Flask, render_template, redirect, url_for, flash
 from flask_login import LoginManager, login_user, login_required, logout_user, current_user, UserMixin
+from flask_migrate import Migrate
 from flask_sqlalchemy import SQLAlchemy
-
-# from models.User import User
-# from models.User import db
-# from models.Product import Product
+from models.Forms.OrderForm import OrderForm
 from models.Forms.ProductForm import ProductForm
 from models.Forms.RegistrationForm import RegistrationForm
 from models.Forms.LoginForm import LoginForm
 from models.Forms.SearchByCategoryForm import SearchByCategoryForm
+from sqlalchemy.exc import IntegrityError
+from flask import request
+
+
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'your_secret_key'
@@ -17,7 +19,7 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SQLALCHEMY_POOL_SIZE'] = 10
 
 db = SQLAlchemy(app)
-# db_session = db.scoped_session(db.sessionmaker(autocommit=False, autoflush=False, bind=db.engine))
+migrate = Migrate(app, db)
 
 login_manager = LoginManager(app)
 login_manager.login_view = 'login'
@@ -35,6 +37,17 @@ class Product(db.Model):
     name = db.Column(db.String(50), nullable=False)
     price = db.Column(db.Float, nullable=False)
     description = db.Column(db.Text, nullable=False)
+
+
+class Order(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    product_id = db.Column(db.Integer, db.ForeignKey('product.id'), nullable=False)
+    product_name = db.Column(db.String(50), nullable=False)
+    price = db.Column(db.Float, nullable=False)
+    # product_description = db.Column(db.Text, nullable=False)
+    user = db.relationship('User', backref=db.backref('orders', lazy=True))
+    product = db.relationship('Product', backref=db.backref('orders', lazy=True))
 
 
 @login_manager.user_loader
@@ -109,19 +122,58 @@ def logout():
     return redirect(url_for('home'))
 
 
+
+from sqlalchemy.orm import exc
+
+# ...
+
 @app.route("/profile", methods=['GET', 'POST'])
 @login_required
 def profile():
     form = SearchByCategoryForm()
+    order_form = OrderForm()
     search_results = []
 
     if form.validate_on_submit():
         search_query = form.category.data
-        print("Form submitted.")
-
         search_results = Product.query.filter(Product.name.ilike(f"%{search_query}%")).all()
-    return render_template("profile.html", user=current_user, form=form, search_results=search_results)
 
+    if order_form.validate_on_submit():
+        product_id = request.form.get('product_id')
+        product = Product.query.get(product_id)
+
+        if product:
+            try:
+                # Create a new order
+                order = Order(
+                    user_id=current_user.id,
+                    product_id=product.id,
+                    product_name=product.name,
+                    price=product.price)
+                db.session.add(order)
+                db.session.commit()
+
+                # Remove the product from the database
+                db.session.delete(product)
+
+                # Delete associated orders
+                associated_orders = Order.query.filter_by(product_id=product.id).all()
+                for order in associated_orders:
+                    db.session.delete(order)
+
+                db.session.commit()
+
+                flash('Order placed successfully!', 'success')
+
+            except IntegrityError:
+                db.session.rollback()  # Rollback changes if there's an error (e.g., concurrent modification)
+                flash('Error placing order. Please try again.', 'danger')
+
+            return render_template("profile.html", user=current_user, form=form, search_results=search_results,
+                                   order_form=order_form)
+
+    return render_template("profile.html", user=current_user, form=form, search_results=search_results,
+                           order_form=order_form)
 
 ################# Product ############
 
@@ -177,4 +229,5 @@ def add_product():
 if __name__ == '__main__':
     with app.app_context():
         db.create_all()
+
     app.run(debug=True)
