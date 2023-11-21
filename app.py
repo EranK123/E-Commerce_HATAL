@@ -7,10 +7,10 @@ from models.Forms.ProductForm import ProductForm
 from models.Forms.RegistrationForm import RegistrationForm
 from models.Forms.LoginForm import LoginForm
 from models.Forms.SearchByCategoryForm import SearchByCategoryForm
-from sqlalchemy.exc import IntegrityError
 from flask import request
-
-
+# from models.User import User
+# from models.Product import Product
+# from models.Order import Order
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'your_secret_key'
@@ -19,8 +19,6 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SQLALCHEMY_POOL_SIZE'] = 10
 
 db = SQLAlchemy(app)
-migrate = Migrate(app, db)
-
 login_manager = LoginManager(app)
 login_manager.login_view = 'login'
 
@@ -64,19 +62,16 @@ def home():
 def register():
     form = RegistrationForm()
     if form.validate_on_submit():
-        # Check if the username is already taken
         existing_username = User.query.filter_by(username=form.username.data).first()
         if existing_username:
             flash('Username is already taken. Please choose a different one.', 'danger')
             return render_template("register.html", form=form)
 
-        # Check if the email is already taken
         existing_email = User.query.filter_by(email=form.email.data).first()
         if existing_email:
             flash('Email is already taken. Please choose a different one.', 'danger')
             return render_template("register.html", form=form)
 
-        # If both username and email are available, create the new user
         user = User(username=form.username.data, email=form.email.data, password=form.password.data)
         db.session.add(user)
         db.session.commit()
@@ -123,9 +118,6 @@ def logout():
 
 
 
-from sqlalchemy.orm import exc
-
-# ...
 
 @app.route("/profile", methods=['GET', 'POST'])
 @login_required
@@ -143,37 +135,24 @@ def profile():
         product = Product.query.get(product_id)
 
         if product:
-            try:
-                # Create a new order
-                order = Order(
-                    user_id=current_user.id,
-                    product_id=product.id,
-                    product_name=product.name,
-                    price=product.price)
-                db.session.add(order)
-                db.session.commit()
+            order = Order(
+                user_id=current_user.id,
+                product_id=product.id,
+                product_name=product.name,
+                price=product.price)
+            db.session.add(order)
+            db.session.commit()
 
-                # Remove the product from the database
-                db.session.delete(product)
+            # db.session.delete(product)
 
-                # Delete associated orders
-                associated_orders = Order.query.filter_by(product_id=product.id).all()
-                for order in associated_orders:
-                    db.session.delete(order)
-
-                db.session.commit()
-
-                flash('Order placed successfully!', 'success')
-
-            except IntegrityError:
-                db.session.rollback()  # Rollback changes if there's an error (e.g., concurrent modification)
-                flash('Error placing order. Please try again.', 'danger')
+            flash('Order placed successfully!', 'success')
 
             return render_template("profile.html", user=current_user, form=form, search_results=search_results,
                                    order_form=order_form)
 
     return render_template("profile.html", user=current_user, form=form, search_results=search_results,
                            order_form=order_form)
+
 
 ################# Product ############
 
@@ -187,7 +166,6 @@ def search_by_category():
         search_results = Product.query.filter(Product.name.ilike(f"%{search_query}%")).all()
         return render_template("profile.html", user=current_user, form=form, search_results=search_results)
 
-    # Redirect to the profile page if the form is not submitted correctly
     return redirect(url_for('profile'))
 
 
