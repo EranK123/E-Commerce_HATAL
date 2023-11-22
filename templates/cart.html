@@ -4,7 +4,7 @@
   <div class="container mt-5">
     <div class="row justify-content-center">
       <div class="col-md-8">
-        <div class="card">
+        <div class="card shadow">
           <div class="card-body">
             <h2 class="text-center mb-4">Shopping Cart</h2>
 
@@ -15,17 +15,27 @@
                     <div class="d-flex justify-content-between align-items-center">
                       <div>
                         <strong>{{ item.product_name }}</strong> - ${{ item.price }}
+                        {% if item.product_description %}
+                          <p>{{ item.product_description }}</p>
+                        {% endif %}
+                      </div>
+                      <div>
+                        <form method="post" action="{{ url_for('remove_from_cart', order_id=item.id) }}">
+                          {{ order_form.csrf_token }}
+                          <button type="submit" class="btn btn-danger">Remove</button>
+                        </form>
                       </div>
                     </div>
                   </li>
                 {% endfor %}
               </ul>
+              <div class="text-center mt-3">
+                <a href="{{ url_for('checkout') }}" class="btn btn-primary">Checkout</a>
+                <a href="{{ url_for('profile') }}" class="btn btn-secondary">Back to Profile</a>
+              </div>
             {% else %}
               <p class="text-center">Your cart is empty.</p>
             {% endif %}
-            <div class="text-center mt-3">
-              <a href="{{ url_for('profile') }}" class="btn btn-primary">Back to Profile</a>
-            </div>
           </div>
         </div>
       </div>

@@ -25,7 +25,6 @@ login_manager.login_view = 'login'
 migrate = Migrate(app, db)
 
 
-
 class User(db.Model, UserMixin):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(20), unique=True, nullable=False)
@@ -46,7 +45,7 @@ class Order(db.Model):
     product_id = db.Column(db.Integer, db.ForeignKey('product.id'), nullable=False)
     product_name = db.Column(db.String(50), nullable=False)
     price = db.Column(db.Float, nullable=False)
-    # product_description = db.Column(db.Text, nullable=False)
+    product_description = db.Column(db.Text, nullable=True)
     user = db.relationship('User', backref=db.backref('orders', lazy=True))
     product = db.relationship('Product', backref=db.backref('orders', lazy=True))
     status = db.Column(db.String(20), default='cart', nullable=False)
@@ -140,11 +139,10 @@ def profile():
                 product_id=product.id,
                 product_name=product.name,
                 price=product.price,
-                status='cart')
+                status='cart',
+                product_description=product.description)
             db.session.add(order)
             db.session.commit()
-
-            # db.session.delete(product)
 
             flash('Item added to cart!', 'success')
 
@@ -154,8 +152,6 @@ def profile():
     return render_template("profile.html", user=current_user, form=form, search_results=search_results,
                            order_form=order_form)
 
-
-################# Product ############
 
 @app.route("/search_by_category", methods=['POST'])
 @login_required
@@ -205,13 +201,42 @@ def add_product():
 @app.route("/cart")
 @login_required
 def cart():
-    # Retrieve the user's cart items from the database
     cart_items = Order.query.filter_by(user_id=current_user.id).all()
+    order_form = OrderForm()
+    return render_template("cart.html", user=current_user, cart_items=cart_items, order_form=order_form)
 
-    return render_template("cart.html", user=current_user, cart_items=cart_items)
+
+@app.route("/checkout")
+@login_required
+def checkout():
+    cart_items = Order.query.filter_by(user_id=current_user.id).all()
+    for item in cart_items:
+        db.session.delete(item)
+        product = Product.query.get(item.product_id)
+        if product:
+            db.session.delete(product)
+
+    db.session.commit()
+
+    flash('Checkout successful! Your orders have been processed.', 'success')
+    return redirect(url_for('profile'))
 
 
-################# Product ############
+# ... (previous code remains unchanged)
+
+@app.route("/remove_from_cart/<int:order_id>", methods=['POST'])
+@login_required
+def remove_from_cart(order_id):
+    order = Order.query.get(order_id)
+
+    if order and order.user_id == current_user.id:
+        db.session.delete(order)
+        db.session.commit()
+        flash('Item removed from the cart!', 'success')
+    else:
+        flash('Failed to remove item from the cart.', 'danger')
+
+    return redirect(url_for('cart'))
 
 
 if __name__ == '__main__':
