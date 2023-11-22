@@ -8,6 +8,7 @@ from models.Forms.RegistrationForm import RegistrationForm
 from models.Forms.LoginForm import LoginForm
 from models.Forms.SearchByCategoryForm import SearchByCategoryForm
 from flask import request
+
 # from models.User import User
 # from models.Product import Product
 # from models.Order import Order
@@ -21,6 +22,8 @@ app.config['SQLALCHEMY_POOL_SIZE'] = 10
 db = SQLAlchemy(app)
 login_manager = LoginManager(app)
 login_manager.login_view = 'login'
+migrate = Migrate(app, db)
+
 
 
 class User(db.Model, UserMixin):
@@ -46,6 +49,7 @@ class Order(db.Model):
     # product_description = db.Column(db.Text, nullable=False)
     user = db.relationship('User', backref=db.backref('orders', lazy=True))
     product = db.relationship('Product', backref=db.backref('orders', lazy=True))
+    status = db.Column(db.String(20), default='cart', nullable=False)
 
 
 @login_manager.user_loader
@@ -85,17 +89,15 @@ def register():
 def login():
     form = LoginForm()
     if form.validate_on_submit():
-        # Check if the login is for an admin
         if form.email.data == 'admin@admin.com' and form.password.data == 'admin':
-            flash('Admin login successful!', 'success')
+            # flash('Admin login successful!', 'success')
             login_user(User.query.get(1))
             return render_template("admin_dashboard.html", form=ProductForm(), products=Product.query.all())
 
-        # Check if the login is for a regular user
         user = User.query.filter_by(email=form.email.data).first()
         if user and user.password == form.password.data:
             login_user(user)
-            flash('Login successful!', 'success')
+            # flash('Login successful!', 'success')
             return redirect(url_for('profile'))
         else:
             flash('Login unsuccessful. Please check email and password.', 'danger')
@@ -115,8 +117,6 @@ def mylogout():
 def logout():
     logout_user()
     return redirect(url_for('home'))
-
-
 
 
 @app.route("/profile", methods=['GET', 'POST'])
@@ -139,13 +139,14 @@ def profile():
                 user_id=current_user.id,
                 product_id=product.id,
                 product_name=product.name,
-                price=product.price)
+                price=product.price,
+                status='cart')
             db.session.add(order)
             db.session.commit()
 
             # db.session.delete(product)
 
-            flash('Order placed successfully!', 'success')
+            flash('Item added to cart!', 'success')
 
             return render_template("profile.html", user=current_user, form=form, search_results=search_results,
                                    order_form=order_form)
@@ -181,7 +182,7 @@ def admin_dashboard():
 @login_required
 def admin_logout():
     logout_user()
-    flash('Admin logged out successfully!', 'success')
+    # flash('Admin logged out successfully!', 'success')
     return redirect(url_for('login'))
 
 
@@ -199,6 +200,15 @@ def add_product():
     else:
         flash('Failed to add product. Please check the form.', 'danger')
     return redirect(url_for('admin_dashboard'))
+
+
+@app.route("/cart")
+@login_required
+def cart():
+    # Retrieve the user's cart items from the database
+    cart_items = Order.query.filter_by(user_id=current_user.id).all()
+
+    return render_template("cart.html", user=current_user, cart_items=cart_items)
 
 
 ################# Product ############

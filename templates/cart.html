@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+
+{% block content %}
+  <div class="container mt-5">
+    <div class="row justify-content-center">
+      <div class="col-md-8">
+        <div class="card">
+          <div class="card-body">
+            <h2 class="text-center mb-4">Shopping Cart</h2>
+
+            {% if cart_items %}
+              <ul class="list-group">
+                {% for item in cart_items %}
+                  <li class="list-group-item">
+                    <div class="d-flex justify-content-between align-items-center">
+                      <div>
+                        <strong>{{ item.product_name }}</strong> - ${{ item.price }}
+                      </div>
+                    </div>
+                  </li>
+                {% endfor %}
+              </ul>
+            {% else %}
+              <p class="text-center">Your cart is empty.</p>
+            {% endif %}
+            <div class="text-center mt-3">
+              <a href="{{ url_for('profile') }}" class="btn btn-primary">Back to Profile</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock %}
