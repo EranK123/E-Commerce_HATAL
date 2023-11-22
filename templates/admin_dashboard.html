@@ -1,52 +1,126 @@
-<!-- templates/admin_dashboard.html -->
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <!-- ... (head content) ... -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+            text-align: center;
+            color: #333;
+        }
+
+        h1, h2 {
+            color: #007BFF;
+        }
+
+        form {
+            max-width: 400px;
+            margin: 20px auto;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            text-align: left;
+        }
+
+        form div {
+            margin-bottom: 15px;
+        }
+
+        form label {
+            display: block;
+            margin-bottom: 8px;
+        }
+
+        form input, form textarea {
+            width: 100%;
+            padding: 8px;
+            box-sizing: border-box;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+
+        form button {
+            background-color: #007BFF;
+            color: #fff;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        form button:hover {
+            background-color: #0056b3;
+        }
+
+        ul {
+            list-style-type: none;
+            padding: 0;
+            text-align: left;
+            margin: 20px 0;
+        }
+
+        ul li {
+            background-color: #fff;
+            padding: 10px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+        }
+
+        a {
+            text-decoration: none;
+            color: #007BFF;
+            font-weight: bold;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+    </style>
 </head>
 <body>
     <h1>Welcome, Admin!</h1>
-
-    <!-- Product Form -->
     <h2>Add Product</h2>
     <form method="POST" action="{{ url_for('add_product') }}">
         {{ form.hidden_tag() }}
         {{ form.csrf_token }}
         <div>
-            {{ form.category.label }} {{ form.category() }}
+            <label for="category">Category:</label>
+            {{ form.category() }}
             {{ form.category.errors }}
         </div>
         <div>
-            {{ form.price.label }} {{ form.price() }}
+            <label for="price">Price:</label>
+            {{ form.price() }}
             {{ form.price.errors }}
         </div>
         <div>
-            {{ form.description.label }} {{ form.description() }}
+            <label for="description">Description:</label>
+            {{ form.description() }}
             {{ form.description.errors }}
         </div>
         <div>
             {{ form.submit() }}
         </div>
     </form>
-    <!-- ... other content ... -->
-<div>
-    <a href="{{ url_for('admin_logout') }}">Logout</a>
-</div>
-<!-- ... other content ... -->
-
-    <!-- Product List -->
+    <div>
+        <a href="{{ url_for('admin_logout') }}">Logout</a>
+    </div>
     <h2>Product List</h2>
     <ul>
         {% for product in products %}
             <li>
-                Category: {{ product.category }} |
-                Price: {{ product.price }} |
-                Description: {{ product.description }}
+                <strong>Category:</strong> {{ product.category }}<br>
+                <strong>Price:</strong> {{ product.price }}<br>
+                <strong>Description:</strong> {{ product.description }}
             </li>
         {% endfor %}
     </ul>
-
-    <!-- ... (other content) ... -->
 </body>
 </html>

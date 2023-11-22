@@ -1,25 +1,41 @@
-<!-- templates/search.html -->
-
 {% extends "base.html" %}
 {% block content %}
-  {% if current_user.is_authenticated %}
-    <h2>Search Results</h2>
-    <form method="post" action="{{ url_for('search') }}">
-        <input type="text" name="search_query" placeholder="Enter category">
-        <input type="submit" value="Search">
-    </form>
-    {% if search_results %}
-      <ul>
-        {% for product in search_results %}
-          <li>
-            <strong>{{ product.category }}</strong>: {{ product.description }} - ${{ product.price }}
-          </li>
-        {% endfor %}
-      </ul>
-    {% else %}
-      <p>No results found for '{{ query }}'.</p>
-    {% endif %}
-  {% else %}
-    <p>You need to be logged in to use the search feature.</p>
-  {% endif %}
+  <div class="container mt-5">
+    <div class="row justify-content-center">
+      <div class="col-md-6">
+        {% if current_user.is_authenticated %}
+          <div class="card">
+            <div class="card-body">
+              <h2 class="text-center mb-4">Search Results</h2>
+              <form method="post" action="{{ url_for('search') }}" class="mb-3">
+                <div class="input-group">
+                  <input type="text" name="search_query" class="form-control" placeholder="Enter category">
+                  <div class="input-group-append">
+                    <input type="submit" value="Search" class="btn btn-primary">
+                  </div>
+                </div>
+              </form>
+              {% if search_results %}
+                <ul class="list-group">
+                  {% for product in search_results %}
+                    <li class="list-group-item">
+                      <strong>{{ product.category }}</strong>: {{ product.description }} - ${{ product.price }}
+                    </li>
+                  {% endfor %}
+                </ul>
+              {% else %}
+                <p class="text-center mt-3">No results found for '{{ query }}'.</p>
+              {% endif %}
+            </div>
+          </div>
+        {% else %}
+          <div class="card">
+            <div class="card-body">
+              <p class="text-center">You need to be logged in to use the search feature.</p>
+            </div>
+          </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
 {% endblock %}

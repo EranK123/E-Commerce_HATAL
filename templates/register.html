@@ -1,27 +1,82 @@
 {% extends "base.html" %}
 {% block content %}
-  <h2>Register</h2>
-  <form method="post" action="">
-    {{ form.hidden_tag() }}
-    <div class="form-group">
-      {{ form.username.label(class="form-control-label") }}
-      {{ form.username(class="form-control form-control-lg") }}
+  <style>
+    body {
+      background-color: #f4f4f4;
+      font-size: 16px;
+    }
+
+    .container {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+    }
+
+    .card {
+      width: 100%;
+      max-width: 500px;
+    }
+
+    .card-body {
+      padding: 30px;
+    }
+
+    .form-label {
+      color: #333;
+      font-size: 18px;
+    }
+
+    .form-control {
+      margin-bottom: 20px;
+      font-size: 16px;
+      padding: 10px;
+    }
+
+    .btn-info {
+      background-color: #007BFF;
+      color: #fff;
+      font-size: 18px;
+    }
+
+    .btn-info:hover {
+      background-color: #0056b3;
+    }
+
+    .text-info {
+      color: #007BFF;
+      font-size: 16px;
+    }
+  </style>
+
+  <div class="container">
+    <div class="card mt-5">
+      <div class="card-body">
+        <h2 class="text-center mb-4">Register</h2>
+        <form method="post" action="" class="text-left">
+          {{ form.hidden_tag() }}
+          <div class="form-group">
+            {{ form.username.label(class="form-label") }}
+            {{ form.username(class="form-control") }}
+          </div>
+          <div class="form-group">
+            {{ form.email.label(class="form-label") }}
+            {{ form.email(class="form-control") }}
+          </div>
+          <div class="form-group">
+            {{ form.password.label(class="form-label") }}
+            {{ form.password(class="form-control") }}
+          </div>
+          <div class="form-group">
+            {{ form.confirm_password.label(class="form-label") }}
+            {{ form.confirm_password(class="form-control") }}
+          </div>
+          <div class="form-group">
+            {{ form.submit(class="btn btn-info btn-block") }}
+          </div>
+        </form>
+        <p class="text-center mt-3">Already have an account? <a href="{{ url_for('login') }}" class="text-info">Login here</a>.</p>
+      </div>
     </div>
-    <div class="form-group">
-      {{ form.email.label(class="form-control-label") }}
-      {{ form.email(class="form-control form-control-lg") }}
-    </div>
-    <div class="form-group">
-      {{ form.password.label(class="form-control-label") }}
-      {{ form.password(class="form-control form-control-lg") }}
-    </div>
-    <div class="form-group">
-      {{ form.confirm_password.label(class="form-control-label") }}
-      {{ form.confirm_password(class="form-control form-control-lg") }}
-    </div>
-    <div class="form-group">
-      {{ form.submit(class="btn btn-outline-info btn-lg") }}
-    </div>
-  </form>
-  <p>Already have an account? <a href="{{ url_for('login') }}">Login here</a>.</p>
+  </div>
 {% endblock %}

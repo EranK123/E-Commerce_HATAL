@@ -1,45 +1,134 @@
 {% extends "base.html" %}
+
+{% block styles %}
+  <style>
+    body {
+      display: flex;
+      min-height: 100vh;
+      align-items: center;
+      justify-content: center;
+      background-color: #f8f9fa;
+    }
+
+    .container {
+      background-color: #ffffff;
+      border-radius: 10px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      padding: 20px;
+    }
+
+    .card {
+      border: none;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .btn-danger {
+      background-color: #dc3545;
+      border-color: #dc3545;
+    }
+
+    .btn-danger:hover {
+      background-color: #c82333;
+      border-color: #bd2130;
+    }
+
+    .btn-primary {
+      background-color: #007bff;
+      border-color: #007bff;
+    }
+
+    .btn-primary:hover {
+      background-color: #0056b3;
+      border-color: #0056b3;
+    }
+
+    .order-btn {
+      margin-top: 5px;
+    }
+
+    .alert {
+      margin-top: 15px;
+    }
+
+    .list-group {
+      margin-top: 15px;
+    }
+
+    .input-group-text {
+      background-color: #007bff;
+      border-color: #007bff;
+      color: #fff;
+    }
+
+    .input-group-text:hover {
+      background-color: #0056b3;
+      border-color: #0056b3;
+    }
+  </style>
+{% endblock %}
+
 {% block content %}
-  <h2>Profile</h2>
+  <div class="container mt-5">
+    <div class="row justify-content-center">
+      <div class="col-md-8">
+        <div class="card">
+          <div class="card-body">
+            <h2 class="text-center mb-4">Profile</h2>
 
-  <p>Welcome, {{ user.username }}!</p>
-  <p>Email: {{ user.email }}</p>
-  <a href="{{ url_for('logout') }}">Logout</a>
-
-  <h3>Search for Items by Category</h3>
-
-  <form method="post" action="{{ url_for('profile') }}">
-    {{ form.hidden_tag() }}
-    {{ form.category.label }}
-    {{ form.category(size=32) }}
-    {{ form.submit_search() }}
-  </form>
-
-  {% if search_results %}
-  <h3>Search Results</h3>
-  {% with messages = get_flashed_messages(with_categories=true) %}
-    {% for category, message in messages %}
-      {% if category == 'success' %}
-        <div class="alert alert-success">
-          {{ message }}
+            <p class="card-text text-center">Welcome, {{ user.username }}!</p>
+            <p class="card-text text-center">Email: {{ user.email }}</p>
+            <a href="{{ url_for('logout') }}" class="btn btn-danger btn-block">Logout</a>
+          </div>
         </div>
-      {% endif %}
-    {% endfor %}
-  {% endwith %}
-  <ul>
-    {% for product in search_results %}
-      <li>
-        <strong>{{ product.name }}</strong>: {{ product.description }} - ${{ product.price }}
-        {% if product %}
-          <form method="post" action="{{ url_for('profile') }}">
-            {{ order_form.hidden_tag() }}
-            <input type="hidden" name="product_id" value="{{ product.id }}">
-            <button type="submit">Order</button>
-          </form>
-        {% endif %}
-      </li>
-    {% endfor %}
-  </ul>
-{% endif %}
 
+        <div class="mt-4">
+          <h3 class="text-center mb-3">Search for Items by Category</h3>
+
+          <form method="post" action="{{ url_for('profile') }}" class="mb-3">
+            {{ form.hidden_tag() }}
+
+            <div class="input-group">
+              {{ form.category.label(class="input-group-text") }}
+              {{ form.category(class="form-control", size=32) }}
+              <div class="input-group-append">
+                {{ form.submit_search(class="btn btn-primary") }}
+              </div>
+            </div>
+          </form>
+
+          {% if search_results %}
+            <h3 class="text-center mb-3">Search Results</h3>
+            {% with messages = get_flashed_messages(with_categories=true) %}
+              {% for category, message in messages %}
+                {% if category == 'success' %}
+                  <div class="alert alert-success text-center">
+                    {{ message }}
+                  </div>
+                {% endif %}
+              {% endfor %}
+            {% endwith %}
+
+            <ul class="list-group">
+              {% for product in search_results %}
+                <li class="list-group-item">
+                  <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                      <strong>{{ product.name }}</strong>: {{ product.description }} - ${{ product.price }}
+                    </div>
+                    {% if product %}
+                      <form method="post" action="{{ url_for('profile') }}">
+                        {{ order_form.hidden_tag() }}
+                        <input type="hidden" name="product_id" value="{{ product.id }}">
+                        <button type="submit" class="btn btn-primary order-btn">Order</button>
+                      </form>
+                    {% endif %}
+                  </div>
+                </li>
+              {% endfor %}
+            </ul>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
 {% endblock %}
