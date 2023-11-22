@@ -1,4 +1,5 @@
 from flask import Flask, render_template, redirect, url_for, flash
+from flask_bcrypt import Bcrypt
 from flask_login import LoginManager, login_user, login_required, logout_user, current_user, UserMixin
 from flask_migrate import Migrate
 from flask_sqlalchemy import SQLAlchemy
@@ -23,6 +24,7 @@ db = SQLAlchemy(app)
 login_manager = LoginManager(app)
 login_manager.login_view = 'login'
 migrate = Migrate(app, db)
+bcrypt = Bcrypt(app)
 
 
 class User(db.Model, UserMixin):
@@ -76,6 +78,7 @@ def register():
             return render_template("register.html", form=form)
 
         user = User(username=form.username.data, email=form.email.data, password=form.password.data)
+        user.password = bcrypt.generate_password_hash(user.password).decode('utf-8')
         db.session.add(user)
         db.session.commit()
         flash('Your account has been created! You can now log in.', 'success')
@@ -94,7 +97,8 @@ def login():
             return render_template("admin_dashboard.html", form=ProductForm(), products=Product.query.all())
 
         user = User.query.filter_by(email=form.email.data).first()
-        if user and user.password == form.password.data:
+        is_valid = bcrypt.check_password_hash(user.password, form.password.data)
+        if user and is_valid:
             login_user(user)
             # flash('Login successful!', 'success')
             return redirect(url_for('profile'))
@@ -222,7 +226,6 @@ def checkout():
     return redirect(url_for('profile'))
 
 
-# ... (previous code remains unchanged)
 
 @app.route("/remove_from_cart/<int:order_id>", methods=['POST'])
 @login_required
@@ -236,7 +239,7 @@ def remove_from_cart(order_id):
     else:
         flash('Failed to remove item from the cart.', 'danger')
 
-    return redirect(url_for('cart'))
+    return redirect(url_for('profile'))
 
 
 if __name__ == '__main__':

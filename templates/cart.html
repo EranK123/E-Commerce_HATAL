@@ -29,10 +29,12 @@
                   </li>
                 {% endfor %}
               </ul>
-              <div class="text-center mt-3">
-                <a href="{{ url_for('checkout') }}" class="btn btn-primary">Checkout</a>
-                <a href="{{ url_for('profile') }}" class="btn btn-secondary">Back to Profile</a>
-              </div>
+              {% if cart_items|length > 0 %}
+                <div class="text-center mt-3">
+                  <a href="{{ url_for('checkout') }}" class="btn btn-primary">Checkout</a>
+                  <a href="{{ url_for('profile') }}" class="btn btn-secondary">Back to Profile</a>
+                </div>
+              {% endif %}
             {% else %}
               <p class="text-center">Your cart is empty.</p>
             {% endif %}
