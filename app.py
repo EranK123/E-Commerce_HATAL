@@ -111,7 +111,7 @@ def login():
 @login_required
 def mylogout():
     logout_user()
-    flash('You have been logged out.', 'success')
+    # flash('You have been logged out.', 'success')
     return redirect(url_for('login'))
 
 
@@ -148,7 +148,7 @@ def profile():
             db.session.add(order)
             db.session.commit()
 
-            flash('Item added to cart!', 'success')
+            # flash('Item added to cart!', 'success')
 
             return render_template("profile.html", user=current_user, form=form, search_results=search_results,
                                    order_form=order_form)
@@ -196,7 +196,7 @@ def add_product():
             description=form.description.data)
         db.session.add(product)
         db.session.commit()
-        flash('Product added successfully!', 'success')
+        # flash('Product added successfully!', 'success')
     else:
         flash('Failed to add product. Please check the form.', 'danger')
     return redirect(url_for('admin_dashboard'))
@@ -224,7 +224,6 @@ def checkout():
 
     flash('Checkout successful! Your orders have been processed.', 'success')
     return redirect(url_for('profile'))
-
 
 
 @app.route("/remove_from_cart/<int:order_id>", methods=['POST'])
